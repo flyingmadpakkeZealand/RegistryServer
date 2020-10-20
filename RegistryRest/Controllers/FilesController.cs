@@ -30,9 +30,10 @@ namespace RegistryRest.Controllers
 
         // GET: api/<FilesController>
         [HttpGet]
-        public IEnumerable<string> Get()
+        [Route("{FileNr}")]
+        public IEnumerable<FileEndPoint> GetAll(string FileNr)
         {
-            return new string[] { "value1", "value2" };
+            return files[FileNr];
         }
 
         // GET api/<FilesController>/5
