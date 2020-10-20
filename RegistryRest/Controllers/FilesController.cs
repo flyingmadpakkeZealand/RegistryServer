@@ -38,29 +38,45 @@ namespace RegistryRest.Controllers
         [Route("{FileName}")]
         public IEnumerable<FileEndPoint> GetAll(string FileName)
         {
-            return files[FileName];
+            if (files.ContainsKey(FileName))
+            {
+                return files[FileName];
+            }
+            else
+            {
+                return null;
+            }
+            
         }
 
         // POST api/<FilesController>
         [HttpPost]
-        [Route("{fileName}")]
-        public void Post(string fileName, [FromBody] FileEndPoint value)
+        [Route("register/{fileName}")]
+        public int Post(string fileName, [FromBody] FileEndPoint value)
         {
             if (files.ContainsKey(fileName))
             {
                 if (files[fileName].Find(endPoint=>endPoint.Port == value.Port && endPoint.IpAddress == value.IpAddress) == null )
                 {
                     files[fileName].Add(value);
+                    return 1;
+                }
+                else
+                {
+                    return 0;
                 }
             }
             else
             {
                 files.Add(fileName, new List<FileEndPoint>(){value});
+                return 1;
             }
+
+            return -1;
         }
 
         // PUT api/<FilesController>/5
-        [HttpPut("{}")]
+        [HttpPut("deregister/{filename}")]
         public void Put(int id, [FromBody] string value)
         {
         }

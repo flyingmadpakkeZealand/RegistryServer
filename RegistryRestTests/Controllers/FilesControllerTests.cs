@@ -36,7 +36,14 @@ namespace RegistryRest.Controllers.Tests
         [TestMethod()]
         public void PostTest()
         {
-            Assert.Fail();
+            if (expr)
+            {
+                
+            }
+            FileEndPoint Te = new FileEndPoint("124.123.123", "1234");
+            controller.Post("FileT", Te);
+
+            Assert.AreEqual(files[]);
         }
 
         [TestMethod()]
