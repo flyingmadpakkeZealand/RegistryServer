@@ -28,29 +28,39 @@ namespace RegistryRest.Controllers
             }
         };
 
-        // GET: api/<FilesController>
-        [HttpGet]
-        [Route("{FileNr}")]
-        public IEnumerable<FileEndPoint> GetAll(string FileNr)
+        public Dictionary<string, List<FileEndPoint>> Files
         {
-            return files[FileNr];
+            get { return files; }
         }
 
-        // GET api/<FilesController>/5
-        [HttpGet("{id}")]
-        public string Get(int id)
+        // GET: api/<FilesController>
+        [HttpGet]
+        [Route("{FileName}")]
+        public IEnumerable<FileEndPoint> GetAll(string FileName)
         {
-            return "value";
+            return files[FileName];
         }
 
         // POST api/<FilesController>
         [HttpPost]
-        public void Post([FromBody] string value)
+        [Route("{fileName}")]
+        public void Post(string fileName, [FromBody] FileEndPoint value)
         {
+            if (files.ContainsKey(fileName))
+            {
+                if (files[fileName].Find(endPoint=>endPoint.Port == value.Port && endPoint.IpAddress == value.IpAddress) == null )
+                {
+                    files[fileName].Add(value);
+                }
+            }
+            else
+            {
+                files.Add(fileName, new List<FileEndPoint>(){value});
+            }
         }
 
         // PUT api/<FilesController>/5
-        [HttpPut("{id}")]
+        [HttpPut("{}")]
         public void Put(int id, [FromBody] string value)
         {
         }

@@ -2,6 +2,7 @@
 using RegistryRest.Controllers;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace RegistryRest.Controllers.Tests
@@ -9,16 +10,21 @@ namespace RegistryRest.Controllers.Tests
     [TestClass()]
     public class FilesControllerTests
     {
-        private Dictionary<string, > files;
-        [TestInitialize]
-        public void init()
+        private static Dictionary<string, List<FileEndPoint>> files;
+        private static FilesController controller;
+        private string baseFile = "File1";
+        [ClassInitialize]
+        public static void Init(TestContext context)
         {
+            controller = new FilesController();
 
+            files = controller.Files;
         }
+
         [TestMethod()]
         public void GetAllTest()
         {
-            Assert.Fail();
+            Assert.AreEqual(files[baseFile].Count, controller.GetAll(baseFile).Count());
         }
 
         [TestMethod()]
