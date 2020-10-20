@@ -23,7 +23,7 @@ namespace RegistryRest.Controllers
             },
             {"File2", new List<FileEndPoint>()
                 {
-                    new FileEndPoint(IPAddress.Loopback.ToString(), "4323")
+                    new FileEndPoint(IPAddress.Loopback.ToString(), "4321")
                 }
             }
         };
