@@ -75,16 +75,34 @@ namespace RegistryRest.Controllers
             return -1;
         }
 
-        // PUT api/<FilesController>/5
-        [HttpPut("deregister/{filename}")]
-        public void Put(int id, [FromBody] string value)
-        {
-        }
-
         // DELETE api/<FilesController>/5
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        [Route("deregister/{filename}")]
+        public int DeRegister(string filename, [FromBody] FileEndPoint value)
         {
+            if (files.ContainsKey(filename))
+            {
+                int index = files[filename].FindIndex(endpoint =>
+                    endpoint.Port == value.Port && endpoint.IpAddress == value.IpAddress);
+                if (index != -1)
+                {
+                    files[filename].RemoveAt(index);
+                    if (files[filename].Count == 0)
+                    {
+                        files.Remove(filename);
+                    }
+                    return 1;
+                }
+                else
+                {
+                    return 0;
+                }
+            }
+            else
+            {
+                return 0;
+            }
+        
         }
     }
 }

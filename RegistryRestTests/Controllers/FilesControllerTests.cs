@@ -28,12 +28,6 @@ namespace RegistryRest.Controllers.Tests
         }
 
         [TestMethod()]
-        public void GetTest()
-        {
-            Assert.Fail();
-        }
-
-        [TestMethod()]
         public void PostTest()
         {
             string newFile = "FileT";
@@ -64,15 +58,17 @@ namespace RegistryRest.Controllers.Tests
         }
 
         [TestMethod()]
-        public void PutTest()
+        public void DeRegisterTest()
         {
-            Assert.Fail();
-        }
+            FileEndPoint FileTest = new FileEndPoint("Test2","Test2");
+            List<FileEndPoint> ListTest = new List<FileEndPoint>() {FileTest};
 
-        [TestMethod()]
-        public void DeleteTest()
-        {
-            Assert.Fail();
+            string FileName = "FileTest2";
+            files.Add(FileName,ListTest);
+
+            controller.DeRegister(FileName, FileTest);
+
+            Assert.AreEqual(files.ContainsKey(FileName),false);
         }
     }
 }
