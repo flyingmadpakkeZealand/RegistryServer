@@ -3,6 +3,7 @@ using RegistryRest.Controllers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
 
 namespace RegistryRest.Controllers.Tests
@@ -10,6 +11,7 @@ namespace RegistryRest.Controllers.Tests
     [TestClass()]
     public class FilesControllerTests
     {
+        
         private static Dictionary<string, List<FileEndPoint>> files;
         private static FilesController controller;
         private string baseFile = "File1";
@@ -17,9 +19,15 @@ namespace RegistryRest.Controllers.Tests
         public static void Init(TestContext context)
         {
             controller = new FilesController();
+            controller.Files.Add("File1", new List<FileEndPoint>()
+            {
+                new FileEndPoint(IPAddress.Loopback.ToString(), "4321"),
+                new FileEndPoint(IPAddress.Loopback.ToString(), "4322")
+            });
 
             files = controller.Files;
         }
+
 
         [TestMethod()]
         public void GetAllTest()
@@ -60,15 +68,24 @@ namespace RegistryRest.Controllers.Tests
         [TestMethod()]
         public void DeRegisterTest()
         {
-            FileEndPoint FileTest = new FileEndPoint("Test2","Test2");
-            List<FileEndPoint> ListTest = new List<FileEndPoint>() {FileTest};
+            FileEndPoint fileTest = new FileEndPoint("Test2","Test2");
+            List<FileEndPoint> listTest = new List<FileEndPoint>(){fileTest};
 
-            string FileName = "FileTest2";
-            files.Add(FileName,ListTest);
+            string fileName = "FileTest2";
+            files.Add(fileName,listTest);
 
-            controller.DeRegister(FileName, FileTest);
+            int response = controller.DeRegister(fileName, fileTest);
 
-            Assert.AreEqual(files.ContainsKey(FileName),false);
+            Assert.AreEqual(files.ContainsKey(fileName),false); //Root file removed.
+            Assert.AreEqual(1, response); //Correct response.
+
+            response = controller.DeRegister(fileName, fileTest);
+            Assert.AreEqual(0, response); //Root file has been removed, correct response.
+
+            files[baseFile].Add(fileTest);
+            response = controller.DeRegister(baseFile, fileTest); 
+            Assert.AreEqual(files.ContainsKey(baseFile), true); //Peer is removed, root stays intact.
+            Assert.AreEqual(1, response); //Correct response.
         }
     }
 }

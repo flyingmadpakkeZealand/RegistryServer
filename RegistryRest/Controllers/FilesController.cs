@@ -13,20 +13,7 @@ namespace RegistryRest.Controllers
     [ApiController]
     public class FilesController : ControllerBase
     {
-        private static Dictionary<string, List<FileEndPoint>> files = new Dictionary<string, List<FileEndPoint>>()
-        {
-            {"File1", new List<FileEndPoint>()
-                {
-                    new FileEndPoint(IPAddress.Loopback.ToString(), "4321"),
-                    new FileEndPoint(IPAddress.Loopback.ToString(), "4322")
-                }
-            },
-            {"File2", new List<FileEndPoint>()
-                {
-                    new FileEndPoint(IPAddress.Loopback.ToString(), "4321")
-                }
-            }
-        };
+        private static Dictionary<string, List<FileEndPoint>> files = new Dictionary<string, List<FileEndPoint>>();
 
         public Dictionary<string, List<FileEndPoint>> Files
         {
