@@ -36,14 +36,31 @@ namespace RegistryRest.Controllers.Tests
         [TestMethod()]
         public void PostTest()
         {
-            if (expr)
-            {
-                
-            }
-            FileEndPoint Te = new FileEndPoint("124.123.123", "1234");
-            controller.Post("FileT", Te);
+            string newFile = "FileT";
+            int count = 0;
 
-            Assert.AreEqual(files[]);
+            FileEndPoint endPoint = new FileEndPoint("Test", "Test");
+            if (files.ContainsKey(newFile))
+            {
+                count = files[newFile].Count;
+
+                int index = files[newFile].FindIndex(listItem =>
+                    listItem.Port == endPoint.Port && listItem.IpAddress == endPoint.IpAddress);
+                if (index != -1)
+                {
+                    files[newFile].RemoveAt(index);
+                }
+            }
+
+
+            controller.Post(newFile, endPoint);
+            Assert.AreEqual(count + 1, files[newFile].Count); //Added.
+
+            int last = files[newFile].Count - 1;
+            Assert.AreEqual(files[newFile][last].Port, endPoint.Port); //Correct state.
+            Assert.AreEqual(files[newFile][last].IpAddress, endPoint.IpAddress);
+
+            Assert.AreEqual(0, controller.Post(newFile, endPoint)); //Duplicate rejected.
         }
 
         [TestMethod()]
