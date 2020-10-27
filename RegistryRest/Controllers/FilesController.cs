@@ -4,6 +4,8 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using ModelLib;
+using EnigmaLite;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -13,9 +15,10 @@ namespace RegistryRest.Controllers
     [ApiController]
     public class FilesController : ControllerBase
     {
-        private static Dictionary<string, List<FileEndPoint>> files = new Dictionary<string, List<FileEndPoint>>();
-
-        public Dictionary<string, List<FileEndPoint>> Files
+        private static char[] key;
+        private static Random rand = new Random(DateTime.Now.Millisecond);
+        private static Dictionary<string, HashSet<string>> files = new Dictionary<string, HashSet<string>>();
+        public Dictionary<string, HashSet<string>> Files
         {
             get { return files; }
         }
@@ -23,7 +26,7 @@ namespace RegistryRest.Controllers
         // GET: api/<FilesController>
         [HttpGet]
         [Route("{FileName}")]
-        public IEnumerable<FileEndPoint> GetAll(string FileName)
+        public IEnumerable<string> GetAll(string FileName)
         {
             if (files.ContainsKey(FileName))
             {
@@ -31,7 +34,7 @@ namespace RegistryRest.Controllers
             }
             else
             {
-                return null;
+                return new List<string>();
             }
             
         }
@@ -39,57 +42,99 @@ namespace RegistryRest.Controllers
         // POST api/<FilesController>
         [HttpPost]
         [Route("register/{fileName}")]
-        public int Post(string fileName, [FromBody] FileEndPoint value)
+        public int Post(string fileName, [FromBody] string value)
         {
             if (files.ContainsKey(fileName))
             {
-                if (files[fileName].Find(endPoint=>endPoint.Port == value.Port && endPoint.IpAddress == value.IpAddress) == null )
-                {
-                    files[fileName].Add(value);
-                    return 1;
-                }
-                else
-                {
-                    return 0;
-                }
+                return files[fileName].Add(value) ? 1 : 0;
             }
-            else
-            {
-                files.Add(fileName, new List<FileEndPoint>(){value});
-                return 1;
-            }
+
+            files.Add(fileName, new HashSet<string>(){value});
+            return 1;
 
             return -1;
         }
 
+        [HttpPut]
+        [Route("batchRemove")]
+        public int BatchRemove([FromBody] List<string> files)
+        {
+            string peer = files[0];
+            int count = 0;
+
+            for (int i = 1; i < files.Count; i++)
+            {
+                count += DeRegister(files[i], peer);
+            }
+
+            return count;
+        }
+
         // DELETE api/<FilesController>/5
-        [HttpDelete("{id}")]
-        [Route("deregister/{filename}")]
-        public int DeRegister(string filename, [FromBody] FileEndPoint value)
+        [HttpDelete]
+        [Route("deregister/{filename}/{peer}")]
+        public int DeRegister(string filename, string peer)
         {
             if (files.ContainsKey(filename))
             {
-                int index = files[filename].FindIndex(endpoint =>
-                    endpoint.Port == value.Port && endpoint.IpAddress == value.IpAddress);
-                if (index != -1)
+                int result = files[filename].Remove(peer) ? 1 : 0;
+                if (files[filename].Count == 0)
                 {
-                    files[filename].RemoveAt(index);
-                    if (files[filename].Count == 0)
-                    {
-                        files.Remove(filename);
-                    }
-                    return 1;
+                    files.Remove(filename);
                 }
-                else
-                {
-                    return 0;
-                }
+
+                return result;
             }
-            else
+
+            return 0;
+
+            return -1;
+        }
+
+        [HttpGet]
+        [Route("key")]
+        public IEnumerable<char> GetKey()
+        {
+            char c1 = (char)rand.Next(33, 123);
+            char c2 = (char)rand.Next(33, 123);
+            char c3 = (char)rand.Next(33, 123);
+
+            key = new[] {c1, c2, c3};
+
+            return key;
+        }
+
+        [HttpPut]
+        [Route("clean")]
+        public int Clean([FromBody]string password)
+        {
+            if (key != null)
             {
-                return 0;
+                string check = "passWord";
+                Enigma enigma = new Enigma(key);
+
+                string dec = enigma.PermString(password);
+
+                int length = dec[^1]-33;
+
+                if (length < dec.Length)
+                {
+                    if (dec.Substring(0, length) == check)
+                    {
+                        files = new Dictionary<string, HashSet<string>>();
+                        return 1;
+                    }
+                }
             }
-        
+
+            return 0;
+        }
+
+        [HttpGet]
+        [Route("dir")]
+        public IEnumerable<string> GetAllFileNames()
+        {
+            return files.Keys;
         }
     }
 }
